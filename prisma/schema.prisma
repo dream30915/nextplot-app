@@ -1,0 +1,53 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  USER
+  ADMIN
+  SUPER_ADMIN
+}
+
+model Profile {
+  id          String   @id
+  role        UserRole @default(USER)
+  displayName String?
+  createdAt   DateTime @default(now())
+  Favorites   Favorite[]
+}
+
+model Property {
+  id            String   @id @default(uuid())
+  code          String?  @unique
+  title         String
+  location      String
+  areaRai       Float?
+  price         Float?
+  deedNumber    String?
+  ownerName     String?
+  published     Boolean  @default(true)
+  zoning        String?
+  coverImage    String?
+  gallery       Json?
+  createdFromRaw BigInt?
+  createdBy     String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  Favorites     Favorite[]
+}
+
+model Favorite {
+  userId     String
+  propertyId String
+  createdAt  DateTime @default(now())
+
+  Profile  Profile  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  Property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@id([userId, propertyId])
+}
